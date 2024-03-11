@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  main-app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - stub-server
+
+  stub-server:
+    build: ./tests/stubbed-tests/stub-server
+    ports:
+      - "5000:5000"

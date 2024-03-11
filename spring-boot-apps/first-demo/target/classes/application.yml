@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: dev
+
+greeting:
+  message: Hello from the Default Environment!
