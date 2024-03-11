@@ -25,7 +25,7 @@ test:
 	docker exec -i $(CONTAINER_NAME) bash < tests/container-tests/version-checks.sh
 	docker rm -f $(CONTAINER_NAME)
 
-test-stubbed:
+test-stubbed: clean
 	docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
 
 scan:

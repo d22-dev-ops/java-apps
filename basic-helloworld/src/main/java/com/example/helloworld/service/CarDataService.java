@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.CSVParser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,12 +19,13 @@ import java.util.Map;
 public class CarDataService {
 
     private static final String DATA_FILE = "./car_data.csv";
-    private static final String API_URL = "http://stub-server:5000//getcardetails";
+    @Value("${api.url}")
+    private String apiUrl;
 
     public String checkCarData(String carName) {
         // Fetch car data from API
         RestTemplate restTemplate = new RestTemplate();
-        String jsonData = restTemplate.getForObject(API_URL, String.class);
+        String jsonData = restTemplate.getForObject(apiUrl, String.class);
 
         // Hash the JSON data
         String currentHash = hashData(jsonData);

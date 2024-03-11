@@ -13,3 +13,6 @@ curl -X GET 'http://localhost:8080/checkCarData?carName=RTX8888'
 
 docker-compose up
 docker-compose up --build
+docker-compose -f docker-compose.test.yml up -d
+docker-compose -f docker-compose.test.yml logs
+docker-compose -f docker-compose.test.yml logs main-app
