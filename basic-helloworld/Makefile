@@ -35,7 +35,7 @@ test:
 test-stubbed: clean
 	docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
 
-# Task "scan": Scan the Docker image for vulnerabilities. (Note: Actual scanning commands are commented out in the provided script.)
+# Task "scan": Scan the Docker image for vulnerabilities
 scan:
 #	trivy image $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(GIT_HASH)-$(BUILD_ID) --security-checks vuln --offline-scan
 #	trivy image $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(GIT_HASH)-$(BUILD_ID) --security-checks vuln --no-progress --offline-scan
@@ -66,6 +66,7 @@ inspect: clean build
 
 # Task "clean": Remove any containers that match the IMAGE_NAME pattern, ensuring the environment is clean for the next operations.
 clean:
+	docker-compose -f docker-compose.test.yml down
 	@docker ps -a -q --filter "name=$(IMAGE_NAME)" | xargs -r docker rm -f
 
 # Task "clean-images": Remove all Docker images matching the IMAGE_NAME pattern, except for the 4 most recently created ones, to manage image storage effectively.
