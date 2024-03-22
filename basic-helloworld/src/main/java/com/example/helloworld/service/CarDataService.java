@@ -76,4 +76,3 @@ public class CarDataService {
         return DigestUtils.sha256Hex(jsonData);
     }
 }
-
