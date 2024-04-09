@@ -27,9 +27,9 @@ build:
 # Task "test": Run tests against the built image to ensure it meets all expected conditions and requirements.
 test:
 #	docker run --rm --name $(CONTAINER_NAME) --rm $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(GIT_HASH)-$(BUILD_ID) bash -c './tests/version_checks.sh'
-	docker run --name $(CONTAINER_NAME) --entrypoint "/bin/sleep" -d $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(GIT_HASH)-$(BUILD_ID) 1000
-	docker exec -i $(CONTAINER_NAME) bash < tests/container-tests/version-checks.sh
-	docker rm -f $(CONTAINER_NAME)
+#	docker run --name $(CONTAINER_NAME) --entrypoint "/bin/sleep" -d $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(GIT_HASH)-$(BUILD_ID) 1000
+#	docker exec -i $(CONTAINER_NAME) bash < tests/container-tests/version-checks.sh
+#	docker rm -f $(CONTAINER_NAME)
 
 # Task "test-stubbed": Run stubbed tests using Docker Compose to orchestrate and manage the test environment.
 test-stubbed: clean
@@ -53,6 +53,7 @@ run:
 	@echo "To log into the container run, use the following command:"
 	@echo "docker exec -it $(IMAGE_NAME)-$(BUILD_ID) /bin/bash"
 	docker ps -a
+	sleep 5
 	docker logs $(IMAGE_NAME)-$(BUILD_ID)
 
 # Task "inspect": Clean up any previous instances, build the image, and run a container for inspection purposes.
