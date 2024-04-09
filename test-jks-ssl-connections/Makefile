@@ -33,7 +33,7 @@ test:
 
 # Task "test-stubbed": Run stubbed tests using Docker Compose to orchestrate and manage the test environment.
 test-stubbed: clean
-	docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
+	docker-compose -f docker-compose.yml up --build --abort-on-container-exit
 
 # Task "scan": Scan the Docker image for vulnerabilities
 scan:

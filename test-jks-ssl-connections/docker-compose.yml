@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  main-app:
+    build: .
+    environment:
+      KEYSTORE_PATH: mykeystore.jks
+      KEYSTORE_PASSWORD: changeit
