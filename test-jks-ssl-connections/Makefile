@@ -48,13 +48,7 @@ push:
 
 # Task "run": Run the Docker container from the image, making it accessible on a specified port.
 run:
-	docker run --name $(IMAGE_NAME)-$(BUILD_ID) -d -p 8080:8080 $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(GIT_HASH)-$(BUILD_ID)
-	@echo "Container $(IMAGE_NAME)-$(BUILD_ID) has been started"
-	@echo "To log into the container run, use the following command:"
-	@echo "docker exec -it $(IMAGE_NAME)-$(BUILD_ID) /bin/bash"
-	docker ps -a
-	sleep 5
-	docker logs $(IMAGE_NAME)-$(BUILD_ID)
+	docker-compose -f docker-compose.yml up --build --abort-on-container-exit
 
 # Task "inspect": Clean up any previous instances, build the image, and run a container for inspection purposes.
 inspect: clean build

@@ -3,5 +3,9 @@ services:
   main-app:
     build: .
     environment:
-      KEYSTORE_PATH: mykeystore.jks
+      EMPTY_KEYSTORE_PATH: mykeystore_empty.jks
       KEYSTORE_PASSWORD: changeit
+#      KEYSTORE_PASSWORD: changeit
+      URLS: |
+        https://www.google.com
+        https://www.example.com

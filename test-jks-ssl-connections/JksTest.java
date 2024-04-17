@@ -12,10 +12,22 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class JksTest {
     public static void main(String[] args) {
-        // Adjust these variables as needed
         String keystorePath = System.getenv("KEYSTORE_PATH");
+        if (keystorePath == null || keystorePath.isEmpty()) {
+            System.err.println("KEYSTORE_PATH environment variable is not set or is empty");
+            return;
+        }
         String keystorePassword = System.getenv("KEYSTORE_PASSWORD");
-        //System.setProperty("javax.net.debug", "ssl");
+        String emptyKeystorePath = System.getenv("EMPTY_KEYSTORE_PATH");
+        // System.setProperty("javax.net.debug", "ssl");
+
+        // Get the list of URLs from the environment variable
+        String urlsEnv = System.getenv("URLS");
+        if (urlsEnv == null || urlsEnv.isEmpty()) {
+            System.err.println("URLS environment variable is not set or is empty");
+            return;
+        }
+        String[] urls = urlsEnv.split("\n"); // Split by newline
 
         String host = "www.google.com";
         int port = 443; // Default HTTPS port
@@ -40,90 +52,130 @@ public class JksTest {
             e.printStackTrace();
         }
 
-        // test a connection with no given truststore / default java cacerts truststore
-        try {
-            System.out.println("TEST 2 - Testing connection with no given truststore / default java cacerts truststore");
+        for (String url : urls) {
+            System.out.println("---------------------------------------- Testing URL: " + url);
 
-            javax.net.ssl.HttpsURLConnection connection = (javax.net.ssl.HttpsURLConnection) new java.net.URL("https://www.google.com").openConnection();
-            connection.connect();
-            System.out.println("Response code: " + connection.getResponseCode());
-            connection.disconnect();
-            System.out.println("Connection successful!");
-            System.out.println("Done!");
-            System.out.println("----------------------------------------");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            // test a connection with no given truststore / default java cacerts truststore
+            try {
+                System.out.println(
+                        "TEST 2 - Testing connection with no given truststore / default java cacerts truststore");
 
-        // test a connection with the given truststore
-        try {
-            System.out.println("TEST 3 - Testing connection with the given truststore: " + keystorePath);
-            // Load the truststore
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (FileInputStream fis = new FileInputStream(keystorePath)) {
-                trustStore.load(fis, keystorePassword.toCharArray());
+                javax.net.ssl.HttpsURLConnection connection = (javax.net.ssl.HttpsURLConnection) new java.net.URL(
+                        url).openConnection();
+                connection.connect();
+                System.out.println("Response code: " + connection.getResponseCode());
+                connection.disconnect();
+                System.out.println("Connection successful!");
+                System.out.println("Done!");
+                System.out.println("----------------------------------------");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            // Create a custom trust manager that uses the truststore
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(trustStore);
-            TrustManager[] trustManagers = tmf.getTrustManagers();
+            // test a connection with the given truststore
+            try {
+                System.out.println("TEST 3 - Testing connection with the empty truststore (expect to failed): " + emptyKeystorePath);
+                // Load the truststore
+                KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                try (FileInputStream fis = new FileInputStream(emptyKeystorePath)) {
+                    trustStore.load(fis, keystorePassword.toCharArray());
+                }
 
-            // Create a custom SSL context that uses the trust manager
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustManagers, null);
+                // Create a custom trust manager that uses the truststore
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(trustStore);
+                TrustManager[] trustManagers = tmf.getTrustManagers();
 
-            // Create a connection and set the custom SSL context
-            HttpsURLConnection connection = (HttpsURLConnection) new URL("https://www.google.com").openConnection();
-            connection.setSSLSocketFactory(sslContext.getSocketFactory());
+                // Create a custom SSL context that uses the trust manager
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, trustManagers, null);
 
-            // Now the connection will use the custom truststore
-            connection.connect();
-            System.out.println("Response code: " + connection.getResponseCode());
-            connection.disconnect();
-            System.out.println("Connection successful!");
-            System.out.println("Done!");
-            System.out.println("----------------------------------------");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                // Create a connection and set the custom SSL context
+                HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+                connection.setSSLSocketFactory(sslContext.getSocketFactory());
 
-        try {
-            System.out.println("TEST 4 - Validating TLS/crypto details of the connection");
-
-            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (FileInputStream fis = new FileInputStream(keystorePath)) {
-                keystore.load(fis, keystorePassword.toCharArray());
+                // Now the connection will use the custom truststore
+                connection.connect();
+                System.out.println("Response code: " + connection.getResponseCode());
+                connection.disconnect();
+                System.out.println("Connection successful!");
+                System.out.println("Done!");
+                System.out.println("----------------------------------------");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            // Initialize TrustManagerFactory with the keystore
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(keystore);
+            // test a connection with the given truststore
+            try {
+                System.out.println("TEST 4 - Testing connection with the given truststore: " + keystorePath);
+                // Load the truststore
+                KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                try (FileInputStream fis = new FileInputStream(keystorePath)) {
+                    trustStore.load(fis, keystorePassword.toCharArray());
+                }
 
-            // Initialize an SSLContext with the TrustManager
-            SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, tmf.getTrustManagers(), null);
+                // Create a custom trust manager that uses the truststore
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(trustStore);
+                TrustManager[] trustManagers = tmf.getTrustManagers();
 
-            // Create an SSLSocketFactory from the SSLContext
-            SSLSocketFactory factory = context.getSocketFactory();
+                // Create a custom SSL context that uses the trust manager
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, trustManagers, null);
 
-            // Create an SSLSocket to the host
-            try (SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) {
-                // Start handshake manually to have access to SSLSession
-                socket.startHandshake();
+                // Create a connection and set the custom SSL context
+                HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+                connection.setSSLSocketFactory(sslContext.getSocketFactory());
 
-                // Retrieve SSLSession to get details
-                System.out.println("Session Details:");
-                System.out.println("Protocol: " + socket.getSession().getProtocol());
-                System.out.println("Cipher suite: " + socket.getSession().getCipherSuite());
-
-                // Add any additional session details you need here
-            System.out.println("Done!");
-            System.out.println("----------------------------------------");
+                // Now the connection will use the custom truststore
+                connection.connect();
+                System.out.println("Response code: " + connection.getResponseCode());
+                connection.disconnect();
+                System.out.println("Connection successful!");
+                System.out.println("Done!");
+                System.out.println("----------------------------------------");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                System.out.println("TEST 5 - Validating TLS/crypto details of the connection");
+
+                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+                try (FileInputStream fis = new FileInputStream(keystorePath)) {
+                    keystore.load(fis, keystorePassword.toCharArray());
+                }
+
+                // Initialize TrustManagerFactory with the keystore
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(keystore);
+
+                // Initialize an SSLContext with the TrustManager
+                SSLContext context = SSLContext.getInstance("TLS");
+                context.init(null, tmf.getTrustManagers(), null);
+
+                // Create an SSLSocketFactory from the SSLContext
+                SSLSocketFactory factory = context.getSocketFactory();
+
+                // Create an SSLSocket to the host
+                try (SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) {
+                    // Start handshake manually to have access to SSLSession
+                    socket.startHandshake();
+
+                    // Retrieve SSLSession to get details
+                    System.out.println("Session Details:");
+                    System.out.println("Protocol: " + socket.getSession().getProtocol());
+                    System.out.println("Cipher suite: " + socket.getSession().getCipherSuite());
+
+                    // Add any additional session details you need here
+                    System.out.println("Done!");
+                    System.out.println("----------------------------------------");
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
         System.out.println("All tests done!");
