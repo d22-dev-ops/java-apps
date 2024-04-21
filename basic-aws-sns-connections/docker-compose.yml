@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  sns-sqs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      LOG_LEVEL: "debug"  # Set this to DEBUG, INFO, WARN, ERROR, etc.
+      SQS_QUEUE_URL: "your-sqs-queue-url"
+      SNS_TOPIC_ARN: "your-sns-topic-arn"
+    networks:
+      - sns-sqs-net
+
+networks:
+  sns-sqs-net:
+    driver: bridge
