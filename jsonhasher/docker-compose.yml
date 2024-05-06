@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+
+  jsonHasher:
+    image: delerium227/jsonhasher:latest
+    ports:
+      - "8080:8080"

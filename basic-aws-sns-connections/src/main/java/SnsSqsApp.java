@@ -13,10 +13,17 @@ public class SnsSqsApp {
     private static final Logger logger = LogManager.getLogger(SnsSqsApp.class);
 
     public static void main(String[] args) {
+        try {
+            System.out.println("Waiting before starting...");
+            Thread.sleep(10000); // 10 seconds delay
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+
         logger.debug("Starting SNS-SQS app");
         AmazonSNS snsClient = AmazonSNSClientBuilder.defaultClient();
         AmazonSQS sqsClient = AmazonSQSClientBuilder.defaultClient();
-        
+
         String sqsUrl = System.getenv("SQS_QUEUE_URL");
         String snsTopicArn = System.getenv("SNS_TOPIC_ARN");
 

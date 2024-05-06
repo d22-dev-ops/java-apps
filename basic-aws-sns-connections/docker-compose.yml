@@ -1,17 +1,44 @@
 version: '3.8'
-
 services:
-  sns-sqs-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+      - "4571:4571"
     environment:
-      LOG_LEVEL: "debug"  # Set this to DEBUG, INFO, WARN, ERROR, etc.
-      SQS_QUEUE_URL: "your-sqs-queue-url"
-      SNS_TOPIC_ARN: "your-sns-topic-arn"
+      SERVICES: sns,sqs
+      DEFAULT_REGION: us-east-1
+      EDGE_PORT: 4566
+      DATA_DIR: /tmp/localstack/data
+    volumes:
+      - "./localstack/init.sh:/tmp/docker-entrypoint-initaws.d/init.sh"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
-      - sns-sqs-net
+      - mynetwork
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+#      start_period: 30s
+    command: [ awslocal --endpoint-url=http://localhost:4566 sns create-topic --name your-topic-name ]
+
+
+#  sns-sqs-app:
+#    build: .
+#    environment:
+#      AWS_REGION: us-east-1
+#      AWS_ACCESS_KEY_ID: test
+#      AWS_SECRET_ACCESS_KEY: test
+#      SQS_QUEUE_URL: http://localstack:4566/000000000000/your-queue-name
+#      SNS_TOPIC_ARN: arn:aws:sns:us-east-1:000000000000:your-topic-name
+#      LOG_LEVEL: "debug"
+#    depends_on:
+#      - localstack
+#    restart: on-failure
+#    networks:
+#      - mynetwork
 
 networks:
-  sns-sqs-net:
-    driver: bridge
+  mynetwork:
